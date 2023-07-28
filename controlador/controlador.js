@@ -1,11 +1,14 @@
-const livros = require("../dados/biblioteca");
+const fs = require("fs/promises");
 
-const consultarLivros = (req, res) => {
-  res.send(livros);
+const consultarLivros = async (req, res) => {
+  let livros = await fs.readFile("./dados/biblioteca.json");
+  res.status(200).send(livros);
 };
 
-const consultarPorId = (req, res) => {
+const consultarPorId = async (req, res) => {
   const id = Number(req.params.id);
+  let livros = await fs.readFile("./dados/biblioteca.json");
+  livros = JSON.parse(livros);
   const livroEncontrado = livros.find((livro) => {
     return livro.id === id;
   });
@@ -22,7 +25,9 @@ const consultarPorId = (req, res) => {
   }
 };
 
-const adicionarUmLivro = (req, res) => {
+const adicionarUmLivro = async (req, res) => {
+  let livros = await fs.readFile("./dados/biblioteca.json");
+  livros = JSON.parse(livros);
   const { titulo, autor, ano, numPaginas } = req.body;
   let livro = {
     id: livros.length + 1,
@@ -32,12 +37,15 @@ const adicionarUmLivro = (req, res) => {
     numPaginas: numPaginas,
   };
   livros.push(livro);
+  fs.writeFile("./dados/biblioteca.json", JSON.stringify(livros, null, 2));
   res.status(200).json({ mensagem: `Livro adicionado.` });
 };
 
-const substituirUmLivro = (req, res) => {
+const substituirUmLivro = async (req, res) => {
   const id = Number(req.params.id);
   const { titulo, autor, ano, numPaginas } = req.body;
+  let livros = await fs.readFile("./dados/biblioteca.json");
+  livros = JSON.parse(livros);
   const livroEncontrado = livros.find((livro) => {
     return livro.id === id;
   });
@@ -53,13 +61,16 @@ const substituirUmLivro = (req, res) => {
       ano: ano,
       numPaginas: numPaginas,
     };
+    fs.writeFile("./dados/biblioteca.json", JSON.stringify(livros, null, 2));
     res.status(200).json({ mensagem: "Livro substituído." });
   }
 };
 
-const alterarUmLivro = (req, res) => {
+const alterarUmLivro = async (req, res) => {
   const id = Number(req.params.id);
   const { titulo, autor, ano, numPaginas } = req.body;
+  let livros = await fs.readFile("./dados/biblioteca.json");
+  livros = JSON.parse(livros);
   const livroEncontrado = livros.find((livro) => {
     return livro.id === id;
   });
@@ -80,11 +91,14 @@ const alterarUmLivro = (req, res) => {
   if (numPaginas) {
     livroEncontrado.numPaginas = numPaginas;
   }
+  fs.writeFile("./dados/biblioteca.json", JSON.stringify(livros, null, 2));
   res.status(200).json({ mensagem: "Livro alterado." });
 };
 
-const removerUmLivro = (req, res) => {
+const removerUmLivro = async (req, res) => {
   const id = Number(req.params.id);
+  let livros = await fs.readFile("./dados/biblioteca.json");
+  livros = JSON.parse(livros);
   const livroRemovido = livros.find((livro) => {
     return livro.id === id;
   });
@@ -94,6 +108,7 @@ const removerUmLivro = (req, res) => {
     });
   } else {
     livros.splice(livroRemovido, 1);
+    fs.writeFile("./dados/biblioteca.json", JSON.stringify(livros, null, 2));
     res.status(200).json({ mensagem: "Livro removido." });
   }
 };
